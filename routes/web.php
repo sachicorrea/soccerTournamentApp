@@ -27,3 +27,7 @@ Route::resources([
 ]);
 
 Route::resource('ruta', NombreControladorController::class);
+
+Route::resource('equipos', EquiposController::class)->middleware('auth');
+
+Route::resource('jugadores', JugadoresController::class)->middleware('auth');

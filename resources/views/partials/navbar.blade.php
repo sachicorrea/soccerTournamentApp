@@ -48,11 +48,12 @@
                 <li><a class="dropdown-item" href="../posiciones">Show position</a></li>
                 <li><a class="dropdown-item" href="../posiciones/create">New position</a></li>
             </ul>
-        </li>
+        </li>  
 
-        <form class="d-flex">
-            <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-            <button class="btn btn-outline-success" type="submit">Search</button>
+        <a class="nav-link disabled" href="#">{{ Auth::user()->name }}</a>
+        <form class="form-inline my-2 my-lg-0" action="{{ route('logout') }}" method="post">
+            @csrf
+            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Cerrar Sesión</button>
         </form>
     </div>
   </div>

@@ -1,7 +1,13 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use Illuminate\Http\Request;
+use App\Models\Municipio;
+use App\Models\Equipo;
+use App\Http\Requests\StoreEquiposRequest;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Auth;
 
 class EquiposController extends Controller
 {
@@ -12,7 +18,9 @@ class EquiposController extends Controller
      */
     public function index()
     {
-        return view('equipos.index')->with('equipos', $this->equipos);
+        $equipos = Equipo::all();
+        return view('equipos.index')
+                ->with('equipos', $equipos);
     }
 
     /**
@@ -22,7 +30,13 @@ class EquiposController extends Controller
      */
     public function create()
     {
-        return view('equipos.create');
+        if(Auth::user()->rol == 2) {
+            return redirect()->route('equipos.index');
+        }
+        
+        $municipios = Municipio::all();
+        return view('equipos.create')
+                ->with('municipios', $municipios);
     }
 
     /**
@@ -31,9 +45,21 @@ class EquiposController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(StoreEquiposRequest $request)
     {
-        //
+        if($request -> hasFile('escudo')) {
+            $file = $request -> file('escudo');
+            $escudo = time() . $file -> getClientOriginalName();
+            $file -> move("images/equipos", $escudo);
+        }
+
+        $equipo = new Equipo();
+        $equipo -> nombre = $request -> nombre;
+        $equipo -> dt = $request -> dt;
+        $equipo -> municipio_id = $request -> municipio;
+        $equipo -> escudo = $escudo;
+        $equipo->save();
+        return redirect()->route('equipos.index')->with('status', 'Equipo creado');
     }
 
     /**
@@ -44,7 +70,9 @@ class EquiposController extends Controller
      */
     public function show($id)
     {
-        return view('equipos.show')->with('id', $id);
+        $equipo = Equipo::find($id);
+        return view('equipos.show')
+            ->with('equipo', $equipo);
     }
 
     /**
@@ -55,7 +83,15 @@ class EquiposController extends Controller
      */
     public function edit($id)
     {
-        return view('equipos.edit')->with('id', $id);
+        if(Auth::user()->rol == 2) {
+            return redirect()->route('equipos.index');
+        }
+
+        $equipo = Equipo::find($id);
+        $municipios = Municipio::all();
+        return view('equipos.edit')
+                    ->with('equipo', $equipo)
+                    ->with('municipios', $municipios);
     }
 
     /**
@@ -67,7 +103,19 @@ class EquiposController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $equipo = Equipo::find($id);
+        $equipo->nombre = $request->nombre;
+        $equipo->dt = $request->dt;
+        $equipo->municipio_id = $request->municipio;
+
+        if($request -> hasFile('escudo')) {
+            $file = $request -> file('escudo');
+            $escudo = $equipo->escudo;
+            $file -> move("images/equipos", $escudo);
+        }
+
+        $equipo->save();
+        return redirect()->route('equipos.index')->with('status', 'Equipo actualizado');
     }
 
     /**
@@ -78,9 +126,14 @@ class EquiposController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $equipo = Equipo:: find($id);
+        $equipo->delete();
+        File::delete("images/equipos/".$equipo->escudo);
+        return redirect()->route('equipos.index')
+                                ->with('status', 'Equipo eliminado');
     }
 
+    /*
     private $equipos = array(
         array(
             'nombre' => 'equipo 1',
@@ -109,5 +162,7 @@ class EquiposController extends Controller
             'municipio' => 'Municipio 4',
             'escudo' => 'http://ximg.es/200x300/000/fff&text=equipo4'
         )
-    );
+    );*/
+
+
 }
