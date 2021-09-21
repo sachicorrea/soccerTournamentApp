@@ -1,5 +1,5 @@
 @extends('layouts.base')
-@section('title', 'Login')
+@section('title', 'Restablecer')
 @section('content')
     @if ($errors->any())
         <div class="alert alert-danger">
@@ -25,4 +25,6 @@
 
         <button type="submit" class="btn btn-primary">Login</button>
     </form>
+
+    <a href="{{ route('password.request') }}">Restablecer contraseña</a>
 @endsection
